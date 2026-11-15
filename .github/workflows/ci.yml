@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  format-check:
+    name: Clang Format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-23
+      - name: Check formatting
+        run: find include lib tools -name '*.cpp' -o -name '*.h' | xargs -r clang-format-23 --dry-run --Werror
+
+  build-and-test:
+    name: Build & Test (Ubuntu 24.04)
+    runs-on: ubuntu-24.04
+    needs: format-check
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build llvm-23 libmlir-23-dev llvm-23-dev python3 python3-pip
+          pip3 install lit filecheck --break-system-packages
+
+      - name: Configure CMake
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G Ninja .. \
+            -DLLVM_DIR=/usr/lib/llvm-23/lib/cmake/llvm \
+            -DMLIR_DIR=/usr/lib/llvm-23/lib/cmake/mlir \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Build pccc-opt
+        run: ninja -C build pccc-opt
+
+      - name: Run Lit Tests
+        run: ninja -C build check-pccc
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pccc-opt-linux
+          path: build/tools/pccc-opt/pccc-opt
+          retention-days: 7

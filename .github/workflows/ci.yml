@@ -12,8 +12,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Setup LLVM 23 Repository
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 23
+
       - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format-23
+        run: sudo apt-get install -y clang-format-23
+
       - name: Check formatting
         run: find include lib tools -name '*.cpp' -o -name '*.h' | xargs -r clang-format-23 --dry-run --Werror
 
@@ -24,10 +32,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Setup LLVM 23 Repository
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 23
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build llvm-23 libmlir-23-dev llvm-23-dev python3 python3-pip
+          sudo apt-get install -y cmake ninja-build llvm-23-dev libmlir-23-dev python3 python3-pip
           pip3 install lit filecheck --break-system-packages
 
       - name: Configure CMake

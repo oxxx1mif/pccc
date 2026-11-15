@@ -1,3 +1,12 @@
 build/
 .clangd
 .cache
+*.cxx
+*.a
+*.so
+*.dll
+*.o
+.vs-code/
+.vscode/
+.idea/
+compile_commands.json

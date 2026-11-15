@@ -1,0 +1,94 @@
+stages:
+  - format-check
+  - build
+  - test
+  - package
+
+variables:
+  CMAKE_BUILD_TYPE: "Release"
+  LLVM_VERSION: "23"
+  GIT_DEPTH: "10"
+
+.linux-build-template: &linux-build
+  stage: build
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends
+        cmake ninja-build git
+        llvm-${LLVM_VERSION}
+        libmlir-${LLVM_VERSION}-dev
+        llvm-${LLVM_VERSION}-dev
+        python3 python3-pip
+    - pip3 install lit filecheck --break-system-packages
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja ..
+        -DLLVM_DIR=/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm
+        -DMLIR_DIR=/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/mlir
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - ninja pccc-opt
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+  retry: 2
+
+build:ubuntu-24.04:
+  <<: *linux-build
+  image: ubuntu:24.04
+
+build:debian-trixie:
+  <<: *linux-build
+  image: debian:trixie
+
+test:linux:
+  stage: test
+  needs: ["build:ubuntu-24.04"]
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends
+        llvm-${LLVM_VERSION} libmlir-${LLVM_VERSION}-dev
+        python3 python3-pip
+    - pip3 install lit filecheck --break-system-packages
+  script:
+    - cd build
+    - ninja check-pccc
+  retry: 1
+
+format-check:
+  stage: format-check
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends clang-format-23
+  script:
+    - clang-format-23 --version
+    - find include lib tools -name '*.cpp' -o -name '*.h' | xargs clang-format-23 --dry-run --Werror
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+package:linux:
+  stage: package
+  needs: ["test:linux"]
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends
+        llvm-${LLVM_VERSION} libmlir-${LLVM_VERSION}-dev cmake ninja-build
+  script:
+    - mkdir -p build && cd build
+    - cmake -G Ninja ..
+        -DLLVM_DIR=/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm
+        -DMLIR_DIR=/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/mlir
+        -DCMAKE_BUILD_TYPE=Release
+    - ninja pccc-opt
+    - mkdir -p ../pkg/bin
+    - cp tools/pccc-opt/pccc-opt ../pkg/bin/
+    - tar czf pccc-linux-x86_64.tar.gz -C ../pkg .
+  artifacts:
+    paths:
+      - pccc-linux-x86_64.tar.gz
+    expire_in: 1 month
+  rules:
+    - if: '$CI_COMMIT_TAG'

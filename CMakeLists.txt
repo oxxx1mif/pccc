@@ -24,3 +24,28 @@ add_definitions(${LLVM_DEFINITIONS})
 add_subdirectory(include/pccc)
 add_subdirectory(lib/pccc)
 add_subdirectory(tools/pccc-opt)
+
+
+
+enable_testing()
+
+find_program(LLVM_LIT_EXECUTABLE 
+  NAMES lit llvm-lit llvm-lit-23
+  PATHS /usr/bin /usr/local/bin /usr/lib/llvm-23/bin
+)
+
+if(NOT LLVM_LIT_EXECUTABLE)
+  find_program(LLVM_LIT_EXECUTABLE NAMES lit llvm-lit llvm-lit-23)
+endif()
+
+if(NOT LLVM_LIT_EXECUTABLE)
+  message(WARNING "lit not found! Tests will be skipped. Install via: sudo apt install llvm-23-tools")
+else()
+  message(STATUS "Using lit: ${LLVM_LIT_EXECUTABLE}")
+  set(LLVM_EXTERNAL_LIT ${LLVM_LIT_EXECUTABLE} CACHE PATH "Path to lit" FORCE)
+  set(PCCC_TOOLS_DIR ${CMAKE_BINARY_DIR}/tools/pccc-opt)
+  set(PCCC_LIB_DIR ${CMAKE_BINARY_DIR}/lib)
+  set(MLIR_TOOLS_DIR /usr/lib/llvm-23/bin)
+  set(LLVM_TOOLS_BINARY_DIR /usr/lib/llvm-23/bin)
+  add_subdirectory(test)
+endif()

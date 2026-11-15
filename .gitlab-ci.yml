@@ -1,0 +1,48 @@
+stages:
+  - build
+  - test
+
+variables:
+  CMAKE_BUILD_TYPE: "Release"
+  LLVM_VERSION: "23"
+
+build:
+  stage: build
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq wget
+    - wget -q https://apt.llvm.org/llvm.sh
+    - chmod +x llvm.sh
+    - ./llvm.sh 23
+    - apt-get install -y -qq cmake ninja-build llvm-23-dev libmlir-23-dev llvm-23-tools mlir-23-tools python3 python3-pip
+    - pip3 install --break-system-packages lit filecheck
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake -G Ninja ..
+        -DLLVM_DIR=/usr/lib/llvm-23/lib/cmake/llvm
+        -DMLIR_DIR=/usr/lib/llvm-23/lib/cmake/mlir
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - ninja pccc-opt
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 day
+
+test:
+  stage: test
+  needs: ["build"]
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq wget
+    - wget -q https://apt.llvm.org/llvm.sh
+    - chmod +x llvm.sh
+    - ./llvm.sh 23
+    - apt-get install -y -qq llvm-23-dev libmlir-23-dev llvm-23-tools mlir-23-tools python3 python3-pip
+    - pip3 install --break-system-packages lit filecheck
+  script:
+    - cd build
+    - ninja check-pccc

@@ -14,17 +14,18 @@ build:
     - apt-get install -y -qq wget
     - wget -q https://apt.llvm.org/llvm.sh
     - chmod +x llvm.sh
-    - ./llvm.sh 23
-    - apt-get install -y -qq cmake ninja-build llvm-23-dev libmlir-23-dev llvm-23-tools mlir-23-tools python3 python3-pip
+    - ./llvm.sh ${LLVM_VERSION}
+    - apt-get install -y -qq cmake ninja-build llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-tools mlir-${LLVM_VERSION}-tools python3 python3-pip
     - pip3 install --break-system-packages lit filecheck
   script:
     - mkdir -p build
     - cd build
-    - cmake -G Ninja ..
-        -DLLVM_DIR=/usr/lib/llvm-23/lib/cmake/llvm
-        -DMLIR_DIR=/usr/lib/llvm-23/lib/cmake/mlir
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - >
+      cmake -G Ninja ..
+      -DLLVM_DIR=/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/llvm
+      -DMLIR_DIR=/usr/lib/llvm-${LLVM_VERSION}/lib/cmake/mlir
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     - ninja pccc-opt
   artifacts:
     paths:
@@ -40,9 +41,10 @@ test:
     - apt-get install -y -qq wget
     - wget -q https://apt.llvm.org/llvm.sh
     - chmod +x llvm.sh
-    - ./llvm.sh 23
-    - apt-get install -y -qq llvm-23-dev libmlir-23-dev llvm-23-tools mlir-23-tools python3 python3-pip
+    - ./llvm.sh ${LLVM_VERSION}
+    - apt-get install -y -qq llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-tools mlir-${LLVM_VERSION}-tools python3 python3-pip
     - pip3 install --break-system-packages lit filecheck
   script:
     - cd build
     - ninja check-pccc
+

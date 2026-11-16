@@ -11,7 +11,7 @@ build:
   image: ubuntu:24.04
   before_script:
     - apt-get update -qq
-    - apt-get install -y -qq wget
+    - apt-get install -y -qq wget lsb-release
     - wget -q https://apt.llvm.org/llvm.sh
     - chmod +x llvm.sh
     - ./llvm.sh ${LLVM_VERSION}
@@ -38,7 +38,7 @@ test:
   image: ubuntu:24.04
   before_script:
     - apt-get update -qq
-    - apt-get install -y -qq wget
+    - apt-get install -y -qq wget lsb-release
     - wget -q https://apt.llvm.org/llvm.sh
     - chmod +x llvm.sh
     - ./llvm.sh ${LLVM_VERSION}
@@ -47,4 +47,3 @@ test:
   script:
     - cd build
     - ninja check-pccc
-

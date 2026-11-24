@@ -4,18 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#ifndef PCCC_DIALECT
-#define PCCC_DIALECT
+#ifndef PCCC_TD
+#define PCCC_TD
 
-include "mlir/IR/DialectBase.td"
+include "PCCCDialect.td"
+include "PCCCTypes.td"
 
-def PCCCDialect : Dialect {
-  let name = "pccc";
-  let summary = "PCCC dialect for FHE cryptography";
-  let description = [{
-    This dialect provides operations and types for Fully Homomorphic Encryption.
-  }];
-  let cppNamespace = "::mlir::pccc";
-}
-
-#endif // PCCC_DIALECT
+#endif  // PCCC_TD

@@ -5,11 +5,21 @@
 //
 
 #include "pccc/PCCC.h"
-
-#include "pccc/PCCC.cpp.inc"
+#include "mlir/IR/Builders.h"
+#include "mlir/IR/DialectImplementation.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 using namespace mlir;
 using namespace mlir::pccc;
 
-void
-PCCCDialect::initialize() {}
+#include "pccc/PCCCDialect.cpp.inc"
+
+#define GET_TYPEDEF_CLASSES
+#include "pccc/PCCCTypes.cpp.inc"
+
+void PCCCDialect::initialize() {
+  addTypes<
+#define GET_TYPEDEF_LIST
+#include "pccc/PCCCTypes.cpp.inc"
+      >();
+}

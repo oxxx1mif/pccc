@@ -25,8 +25,6 @@ add_subdirectory(include/pccc)
 add_subdirectory(lib/pccc)
 add_subdirectory(tools/pccc-opt)
 
-
-
 enable_testing()
 
 find_program(LLVM_LIT_EXECUTABLE 

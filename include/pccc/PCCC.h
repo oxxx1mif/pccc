@@ -11,8 +11,10 @@
 #include "mlir/IR/OpDefinition.h"
 
 #define GET_TYPEDEF_CLASSES
+#include "pccc/PCCCDialect.h.inc"
 #include "pccc/PCCCTypes.h.inc"
 
-#include "pccc/PCCCDialect.h.inc"
+#define GET_OP_CLASSES
+#include "pccc/PCCCOps.h.inc"
 
-#endif // PCCC_H
+#endif  // PCCC_H

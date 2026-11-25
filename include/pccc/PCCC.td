@@ -9,5 +9,6 @@
 
 include "PCCCDialect.td"
 include "PCCCTypes.td"
+include "PCCCOps.td"
 
 #endif  // PCCC_TD

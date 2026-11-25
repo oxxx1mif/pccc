@@ -2,8 +2,12 @@ set(LLVM_TARGET_DEFINITIONS PCCC.td)
 
 mlir_tablegen(PCCCDialect.h.inc -gen-dialect-decls)
 mlir_tablegen(PCCCDialect.cpp.inc -gen-dialect-defs)
+
 mlir_tablegen(PCCCTypes.h.inc -gen-typedef-decls)
 mlir_tablegen(PCCCTypes.cpp.inc -gen-typedef-defs)
+
+mlir_tablegen(PCCCOps.h.inc -gen-op-decls)
+mlir_tablegen(PCCCOps.cpp.inc -gen-op-defs)
 
 add_public_tablegen_target(PCCCTableGen)
 
